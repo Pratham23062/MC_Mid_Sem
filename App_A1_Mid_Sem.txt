@@ -1,0 +1,255 @@
+package com.example
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.Blue
+import androidx.compose.ui.graphics.Color.Companion.Cyan
+import androidx.compose.ui.graphics.Color.Companion.Magenta
+import androidx.compose.ui.graphics.Color.Companion.Red
+import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            Main_app()
+        }
+    }
+}
+
+
+var value = true
+
+@Composable
+fun Main_app()
+{
+    var compList = remember { mutableStateListOf<MutableList<String>>() }
+    var text by remember { mutableStateOf("") }
+    var text1 by remember { mutableStateOf("") }
+
+    Column(modifier=Modifier.fillMaxSize())
+    {
+        NameApp()
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        )
+        {
+            TextField(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .border(
+                        width = 2.dp, color = Red,
+                        shape = CircleShape
+                    )
+                    .clip(CircleShape),
+                value = text,
+                onValueChange = { text = it },
+                placeholder = { Text("Add a company Name") }
+            )
+
+            AppBut(
+                onSubCompany = {
+                    compList.add(mutableListOf(text))
+                    text = ""
+                },
+                isUpdateEnabled = text != ""
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxHeight(0.8f)
+                .fillMaxWidth(1f)
+                .padding(horizontal = 5.dp)
+                .border(2.dp, Black)
+                .background(Cyan)
+        )
+        {
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            )
+            {
+                items(compList)
+                { company ->
+                    var isTextFieldVisible by remember { mutableStateOf(false) }
+                    var isStudentsVisible by remember { mutableStateOf(false) }
+                    Card(
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        modifier = Modifier
+                            .border(1.dp, Black)
+
+                    )
+                    {
+                        androidx.compose.material3.ListItem(
+                            headlineContent = {
+                            Text(text = company.getOrNull(0) ?: "List is empty", fontSize = 20.sp, textAlign = TextAlign.Center,
+                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+                        })
+
+                        AppButStu(
+                            onOpenText = {
+                                isTextFieldVisible=!isTextFieldVisible
+                            },
+                            onAddStu = {
+                                isTextFieldVisible=false
+                                if(text1.isNotBlank())
+                                {
+                                        company.add(text1)
+                                }
+                                text1 = ""
+                            },
+                            onDisplay = {
+                                isStudentsVisible=!isStudentsVisible
+                            }
+                        )
+
+                        if(isTextFieldVisible)
+                        {
+                            TextField(value = text1, onValueChange = {text1=it},
+                                placeholder = { Text("Give Student Names") },
+                                modifier = Modifier
+                                    .align(alignment = Alignment.CenterHorizontally)
+                                    .background(color = Magenta))
+                        }
+
+                        if(isStudentsVisible)
+                        {
+                            Column {
+                                company.drop(1).forEach{
+                                    student -> Text(text = student)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun NameApp() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Blue),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Text(
+            text = "My App Mid Sem",
+            color = White,
+            fontSize = 30.sp
+        )
+    }
+}
+
+@Composable
+fun Ele_button(name: String, onClick: () -> Unit, enabled: Boolean)
+{
+    ElevatedButton(onClick = onClick, enabled = enabled,
+        modifier = Modifier
+            ) {
+        Text(
+            text = name
+        )
+    }
+}
+
+@Composable
+fun AppBut(
+    onSubCompany: () -> Unit,
+    isUpdateEnabled: Boolean
+)
+{
+    Column(modifier = Modifier.fillMaxWidth(),
+        ){
+        Row()
+        {
+            Ele_button(name = "Submit", onClick = onSubCompany, enabled = isUpdateEnabled)
+        }
+    }
+}
+
+@Composable
+fun AppButStu(
+    onOpenText: () -> Unit,
+    onAddStu: () -> Unit,
+    onDisplay: () -> Unit
+)
+{
+    Column(modifier = Modifier
+        .background(color = Magenta)
+        .fillMaxWidth(),
+
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row()
+        {
+            ElevatedButton(
+                onClick = onOpenText,
+                modifier = Modifier.padding(6.dp)
+            ) {
+                Text(
+                    text = "Open"
+                )
+            }
+
+            ElevatedButton(
+                onClick = onAddStu,
+                modifier = Modifier.padding(6.dp)
+            ) {
+                Text(
+                    text = "Add"
+                )
+            }
+
+            ElevatedButton(onClick = onDisplay,
+                modifier = Modifier.padding(6.dp)
+            ) {
+                Text(
+                    text = "Display"
+                )
+            }
+        }
+    }
+}
